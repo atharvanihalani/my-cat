@@ -1,16 +1,26 @@
 class Slipnode():
-    # a slipnode!
+    """
+    Features:
+        activation should decay over time
+        contain a list of outgoing links (to spread activation)
+            do you spread activation across ALL types of links?
+        if i recognize features, i want to be able to activate my node
 
-    # Features:
-        # activation should decay over time
-        # should contain a list of outgoing links (to spread activation)
+        *description/bond/group-nodes* should add top-down structure codelets if active
 
-    # Properties:
-        # conceptual depth
-        # present activation
+    Properties:
+        conceptual depth
+        present activation
+        links (DS unknown? maybe categorize by type of link?)
+
+        maybe instance-links? 
+        
+    Methods:
+
+
     
-    # Methods:
-        # 
+    
+    """
 
     pass
 
