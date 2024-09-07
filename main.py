@@ -1,41 +1,59 @@
 #!/usr/bin/env python3
-"""
-    > python main.py abc abd ppqqrr --interations 10
-
-    iiijjjlll: 670 (avg time 1108.5, avg temp 23.6)
-    iiijjjd: 2 (avg time 1156.0, avg temp 35.0)
-    iiijjjkkl: 315 (avg time 1194.4, avg temp 35.5)
-    iiijjjkll: 8 (avg time 2096.8, avg temp 44.1)
-    iiijjjkkd: 5 (avg time 837.2, avg temp 48.0)
-"""
 
 import argparse
 import logging
-
-# from copycat import Copycat, Reporter, plot_answers, save_answers
+import random
 
 class Copycat():
     def __init__(self, rng_seed) -> None:
+        pass
 
-        # main loop?? idk
+    def run_iter(self, initial, modified, target):
+        """
+        runs ONE iteration of the copycat program on the input strings
+        
+        output: (answer, temperature, time)
+        """
+        
         pass
 
     def run(self, initial, modified, target, iterations):
-        print('testing 123')
-        condition = True
-        while condition:
-            # codelet loop
-            # update slipnet
-            pass
-        pass
-    
-    pass
+        """
+        takes in three strings as an input
+        runs 'n' iterations of the copycat program on them
 
+        answer has form
+            {'rqd': {'count': 3, 'avgtemp': 20.848603874416604, 'avgtime': 1803.6666666666667}, 
+            'rqq': {'count': 4, 'avgtemp': 34.53911829931333, 'avgtime': 2200.0}, 
+            ... }
+        """
+        answers = {}
+        for i in range(iterations):
+            answer = self.run_iter(initial, modified, target)
 
+            if answer[0] not in answers:
+                answers[answer[0]] = {'count': 1, 'avgtemp':answer[1], 'avgtime':answer[2]}
+            else:
+                ans = answers[answer[0]]
+                newtemp = ((ans['count'] * ans['avgtemp']) + answer[1]) / (ans['count'] + 1)
+                newtime = ((ans['count'] * ans['avgtime']) + answer[2]) / (ans['count'] + 1)
+
+                ans['count'] += 1
+                ans['avgtemp'] = newtemp
+                ans['avgtime'] = newtime
+        
+        return answers
 
 
 def main():
-    """Program's main entrance point.  Self-explanatory code."""
+    """Program's main entrance point.  Self-explanatory code.
+    
+        spits out an aggregated answer of the form
+            iiijjjlll: 670 (avg time 1108.5, avg temp 23.6)
+            iiijjjd: 2 (avg time 1156.0, avg temp 35.0)
+            iiijjjkkl: 315 (avg time 1194.4, avg temp 35.5)
+            ...etc
+    """
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', type=int, default=None, help='Provide a deterministic seed for the RNG.')
@@ -50,8 +68,8 @@ def main():
     copycat = Copycat(rng_seed=options.seed)
     answers = copycat.run(options.initial, options.modified, options.target, options.iterations)
 
-    # for answer, d in sorted(iter(answers.items()), key=lambda kv: kv[1]['avgtemp']):
-    #     print('%s: %d (avg time %.1f, avg temp %.1f)' % (answer, d['count'], d['avgtime'], d['avgtemp']))
+    for answer, d in sorted(iter(answers.items()), key=lambda kv: kv[1]['avgtemp']):
+        print('%s: %d (avg time %.1f, avg temp %.1f)' % (answer, d['count'], d['avgtime'], d['avgtemp']))
 
 
 if __name__ == '__main__':

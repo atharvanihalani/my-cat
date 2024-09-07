@@ -1,4 +1,3 @@
-
 class Coderack():
     # a data structure that stores all the codelets
 
@@ -18,4 +17,8 @@ class Coderack():
     def run(self):
         # stochastically pick a codelet to run next
         pass
+
+    def update(self):
+        pass
+    
     pass
