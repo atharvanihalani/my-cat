@@ -5,6 +5,14 @@ import logging
 import random
 
 class Copycat():
+
+    """
+    update time in slipnet (/ workspace¿)
+    initial knowledge parsing: letter cat + object cat + string pos
+        initially fully activate letter-cat/string-pos AND clamp activation 
+    
+    """
+
     def __init__(self, rng_seed) -> None:
         pass
 

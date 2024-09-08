@@ -41,7 +41,7 @@ class Description():
     not sure *how* they're attached to objects
     function of a) description-nodes and b) objects
     
-    
+    strength decay if not useful
     """
     pass
 
@@ -69,8 +69,18 @@ class Bond():
 
 
 class Group():
-    # three types of groups – Predecessor Groups, Successor Groups, Sameness Groups
-    # can be a) an elt in a bond, b) part of larger group, c) in a correspondence
+    """
+    three types of groups - Predecessor Groups, Successor Groups, Sameness Groups
+
+    can be a) an elt in a bond, b) part of larger group, c) in a correspondence
+
+    when formed, automatically add following descriptions (where applicable)
+        letter-cat + string-pos + obj-type
+        add length-description probabilistically based on a) length of group (ie.
+        longer is less likely), b) activation of 'length' node
+
+    strength decay if turn out to not be useful
+    """
 
     def __init__(self) -> None:
         pass
