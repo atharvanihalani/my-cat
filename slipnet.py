@@ -1,4 +1,7 @@
 import random
+from enum import Enum
+
+Link = Enum('Link', ['CATEGORY', 'INSTANCE', 'PROPERTY', 'SLIP', 'LATERAL'])
 
 class Slipnode():
     """
@@ -7,28 +10,33 @@ class Slipnode():
         contain a list of outgoing links (to spread activation)
             do you spread activation across ALL types of links?
         if i recognize features, i want to be able to activate my node
-        # clamp activation!
 
         *description/bond/group-nodes* should add top-down structure codelets if active
 
     Properties:
-        # conceptual depth
-        # present activation
         links (DS unknown? maybe categorize by type of link?)
 
         ONLY for some nodes - maybe instance-links? 
         
     Methods:
-        update method
-            check clamp
-            maybe activation decays over time 
-
         activate_one() 
             some way for codelets to communicate with node when a structure is built
         activate_two()
             way for a node to spread activation to another node via links
-        # method to maybe activate 100%
     
+            
+
+    Spreading Activation - an overview
+
+    i want activated nodes to spread some of their activation to neighbors! 
+    this, however, is easier said than done. here are some questions / issues to think ab
+
+    1) do i want activation to be spread recurrently? ie. bounce around lmao (while decaying, ofc).
+        i think not!
+    2) should it only be spread WHEN activation is increased? or should it be spread whenever activation is above a certain threshold?
+    3) similarly, what about when a node is clamped? should it keep 'pumping out activation'?
+
+
     """
 
     def __init__(self, depth, net) -> None:
@@ -38,6 +46,23 @@ class Slipnode():
         self.clamp = (0, 0) # (time of clamping, duration of clamp)
         
         self.outgoing_links = []
+
+    def update(self):
+        """
+        check clamp, 
+            if is, update clamp duration
+            update if required
+        decay activation 
+            ...unless instances continue to be perceived???
+        try decay activation
+        
+        """
+        if self.is_clamped():
+            self.try_unclamp()
+        
+        if not self.is_clamped():
+            self.decay_activation()
+
     
     def try_fully_activate(self):
         """
@@ -45,8 +70,10 @@ class Slipnode():
         """
         if self.activation < 50:
             return
+        
+        threshold = (self.activation / 100)**3
         random_percent = random.random() * 100
-        if random_percent < self.activation:
+        if random_percent < threshold:
             self.activation = 100
 
     def is_fully_active(self):
@@ -63,14 +90,47 @@ class Slipnode():
     def is_clamped(self):
         return self.clamp[1] != 0
 
+    def try_unclamp(self):
+        """
+        tries to unclamp this node, if it's been clamped for long enough
+        
+        returns:
+            a boolean indicating whether this was successful
+        """
+        current_time = self.slipnet.get_time()
+        start_time, clamp_duration = self.clamp
+
+        if (current_time - start_time) >= clamp_duration:
+            self.unclamp_activation()
+            return True
+        return False
+
+    def unclamp_activation(self):
+        self.clamp = (0, 0)
+
+    def instance_perceived(self):
+        """
+        only called by codelets, if an instance of this structure has been perceived
+        
+        """
+
+
+        pass
+
+    def activate_node(self):
+        """
+        only to be used when structure is perceived by a CODELET
+
+
+        """
+        pass
+
     def on_fully_active(self):
         # spread activation to all nodes i'm linked to
             # spr = ((100 - link_length) / 100) * self.activation
             # note – shrunk links only used to evaluate slippage, bonds, etc – NOT for spreading activation
         # IF has links, shrink links
-        pass
-
-    def spread_activation(self):
+        # ALSO unshrink links when not fully active lmao
         pass
 
     def decay_activation(self):
@@ -91,14 +151,17 @@ class Link():
         ___ links should be able to grow or shrink
         slip links should be able to SLIP
 
-    
+        # method to evaluate slippages / bonds 
+        # method to spread activation
     
     """
 
-    def __init__(self, source, length, dest) -> None:
+    def __init__(self, source, length, dest, type) -> None:
         self.source = source
-        self.length = length # the intrinsic length of the link
+        self.length = length # the ('perceived') length of the link (as opposed to the 'intrinsic' length; only matters for labelled links)
         self.destination = dest
+        self.type = type # enum noting the 'type' of link (eg. 'category link')
+
     
     def spread_activation(self):
         """
@@ -106,6 +169,33 @@ class Link():
         pass
 
     pass
+
+class LabeledLink(Link):
+    def __init__(self, source, length, dest, type, label) -> None:
+        super().__init__(source, length, dest, type)
+        self.label = label 
+        self.intrinsic_length = length # the intrinsic length of the link
+
+        # shrunk link lengths are used to evaluate slippages / bonds / etc
+        # regular link lengths used to spread activation
+        # override spread activation ()
+    
+    def spread_activation(self):
+        #  same method as super(); only use intrinsic_length for calculating it.
+        pass
+
+    def shrink_link(self):
+        if self.is_shrunk():
+            return
+        self.length *= 0.4
+    
+    def unshrink_link(self):
+        if not self.is_shrunk():
+            return
+        self.length *= 2.5
+
+    def is_shrunk(self):
+        return self.length != self.intrinsic_length
 
 class Slipnet():
     """

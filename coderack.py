@@ -1,7 +1,7 @@
 class Coderack():
     """
     Properties:
-        a data structure that stores all pending codelets (will this suffer from population explosion?)
+        a data structure that stores all pending codelets 
         
     Methods:
         an access method to add certain codelets (with urgency values)
