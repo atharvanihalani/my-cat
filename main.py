@@ -20,6 +20,12 @@ class Copycat():
         """
         runs ONE iteration of the copycat program on the input strings
         
+        reset everything
+            slipnet + workspace + temperature + coderack
+
+        initially parse strings
+            letter-category, object-category, and string-position
+        
         output: (answer, temperature, time)
         """
         
