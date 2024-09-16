@@ -12,7 +12,7 @@ class Workspace():
             object descriptions + internal groups + intra-string bonds + inter-string bridges + rules
         how would i store strings?
 
-        each object as some descriptions attached (in the form 'description-type: descriptor')
+        each object has some descriptions attached (in the form 'description-type: descriptor')
             both these above are slipnet nodes
         a description is 'relevant' if its description-type-node is fully active
 
@@ -116,14 +116,104 @@ class Workspace():
         
         the TEMPERATURE is a weighted average of the unhappiness of all objects
             unhappineses being weighted by, you guessed it, object importance
-
-
-    Properties:
-
-    Methods:
             
     """
-    pass
+    def __init__(self) -> None:
+        self.descriptions_by_type = {
+            'letter-category': [],
+            'string-position': [],
+            'object-type': [],
+            'length': [],
+            'direction': [],
+            'alphabetic-position': [],
+            'bond-category': [],
+            'group-category': [],
+        }
+    
+    def update_descriptions(self):
+        # how am i managing state? do i want the nodes to communicate with me? do i want to query them directly?
+            # okay ya, let's do it outside the update loop? slipnet directly communicates w/ this to set description relevance
+        pass
+
+    def add_description(self, description):
+        array = self.descriptions_by_type[description.description_type]
+        array.append(description)
+    
+    def remove_description(self, description):
+        array = self.descriptions_by_type[description.description_type]
+        array.remove(description)
+
+    def set_description_relevance(self, description_type, relevance):
+        """
+        if this description_type node is fully active, the description will be relevant"""
+        array = self.descriptions_by_type[description_type]
+        for description in array:
+            self.relevant = relevance
+
+
+class Object():
+    def __init__(self) -> None:
+        self.importance = None
+        self.happiness = None
+        self.salience = None
+        self.descriptions = []
+    
+    def add_description(self, description):
+        self.descriptions.append(description)
+    
+    def calculate_importance(self):
+        """
+        calculates the importance-value for any particular object
+        i copied this directly from the copycat implementation"""
+        result = 0.0
+        for description in self.descriptions:
+            if description.descriptionType.fully_active():
+                result += description.descriptor.activation
+            else:
+                result += description.descriptor.activation / 20.0
+        if self.group:
+            result *= 2.0 / 3.0
+        if self.changed:
+            result *= 2.0
+        return result
+    
+    def calculate_happiness(self):
+        pass
+
+    def calculate_salience(self):
+        pass
+
+
+class Description():
+    """
+    these assigned to objects (either strings or groups)
+        edit: or bonds too??
+    
+    these are of the format: "description-type: descriptor"
+    they are RELEVANT iff their 'description-type'-node is fully activated
+    imo these should NOT be included in an update loop. instead, you should toggle their relevance directly
+        how? store 'em in a dict in workspace, by 'description-type'?
+    """
+    def __init__(self, description_type, descriptor, workspace) -> None:
+        # TODO nah, okay, pass these in by NODE, not STRING
+        self.description_type = description_type 
+        self.descriptor = descriptor
+
+        self.workspace = workspace
+        self.relevant = False
+        
+        self.add_to_workspace()
+    
+    def add_to_workspace(self):
+        self.workspace.add_description(self)
+    
+    def remove_from_workspace(self):
+        self.workspace.remove_description(self)
+
+    def is_relevant(self):
+        """
+        is this description relevant?"""
+        return self.relevant
 
 
 class Structure():
@@ -138,16 +228,6 @@ class Structure():
         smtn to update strength over time?
         generate codelets to create / enhance these structures (based on what criteria?)
     
-    """
-    pass
-
-class Description():
-    """
-    these assigned to objects (either strings or groups)
-    not sure *how* they're attached to objects
-    function of a) description-nodes and b) objects
-    
-    strength decay if not useful
     """
     pass
 

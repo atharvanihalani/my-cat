@@ -130,7 +130,11 @@ class Slipnode():
             # spr = ((100 - link_length) / 100) * self.activation
             # note – shrunk links only used to evaluate slippage, bonds, etc – NOT for spreading activation
         # IF has links, shrink links
-        # ALSO unshrink links when not fully active lmao
+        # make descriptions relevant!
+
+        # when NOT fully active, 
+            # unshrink links
+            # make descriptions not-relevant!
         pass
 
     def decay_activation(self):
