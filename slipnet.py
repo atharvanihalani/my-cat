@@ -24,6 +24,7 @@ class Slipnode():
         activate_two()
             way for a node to spread activation to another node via links
     
+        to 'get' a certain node, based on name (use dict)
             
 
     Spreading Activation - an overview
@@ -46,6 +47,10 @@ class Slipnode():
         self.clamp = (0, 0) # (time of clamping, duration of clamp)
         
         self.outgoing_links = []
+
+    def get_category(self):
+        cat_link = None #TODO get cat link
+        return cat_link.dest
 
     def update(self):
         """
@@ -212,7 +217,9 @@ class Slipnet():
         reset all nodes and links!
     
     """
-    def __init__(self) -> None:
+    def __init__(self, ctx) -> None:
+        self.coderack = ctx.coderack
+        self.workspace = ctx.workspace
         self.time = 0
 
     def reset(self):

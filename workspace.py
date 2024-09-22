@@ -13,8 +13,8 @@ class Workspace():
         how would i store strings?
 
         each object has some descriptions attached (in the form 'description-type: descriptor')
-            both these above are slipnet nodes
-        a description is 'relevant' if its description-type-node is fully active
+            # both these above are slipnet nodes
+        # a description is 'relevant' if its description-type-node is fully active
 
         at the start of a run, letter-cat + string-pos are clamped high 
 
@@ -118,7 +118,11 @@ class Workspace():
             unhappineses being weighted by, you guessed it, object importance
             
     """
-    def __init__(self) -> None:
+    def __init__(self, ctx) -> None:
+        self.slipnet = ctx.slipnet
+        self.coderack = ctx.coderack
+        self.objects = []
+
         self.descriptions_by_type = {
             'letter-category': [],
             'string-position': [],
@@ -130,23 +134,31 @@ class Workspace():
             'group-category': [],
         }
     
-    def update_descriptions(self):
-        # how am i managing state? do i want the nodes to communicate with me? do i want to query them directly?
-            # okay ya, let's do it outside the update loop? slipnet directly communicates w/ this to set description relevance
+    def update(self):
+        """
+        """
+        self.try_post_translators()
+    
+    def get_objects(self):
+        return self.objects
+
+    def try_post_translators(self):
+        """
+        if rule is formed, post translators!"""
         pass
 
     def add_description(self, description):
-        array = self.descriptions_by_type[description.description_type]
+        array = self.descriptions_by_type[description.description_type.name]
         array.append(description)
     
     def remove_description(self, description):
-        array = self.descriptions_by_type[description.description_type]
+        array = self.descriptions_by_type[description.description_type.name]
         array.remove(description)
 
     def set_description_relevance(self, description_type, relevance):
         """
         if this description_type node is fully active, the description will be relevant"""
-        array = self.descriptions_by_type[description_type]
+        array = self.descriptions_by_type[description_type.name]
         for description in array:
             self.relevant = relevance
 
@@ -157,6 +169,9 @@ class Object():
         self.happiness = None
         self.salience = None
         self.descriptions = []
+
+    def get_descriptions(self):
+        return self.descriptions
     
     def add_description(self, description):
         self.descriptions.append(description)
@@ -193,6 +208,11 @@ class Description():
     they are RELEVANT iff their 'description-type'-node is fully activated
     imo these should NOT be included in an update loop. instead, you should toggle their relevance directly
         how? store 'em in a dict in workspace, by 'description-type'?
+    
+    Strength of descriptions, is a function of
+        conceptual depth of descriptor
+        activation of description type
+        local support of description (ie. number of other descriptions of the same type, in the same string)        
     """
     def __init__(self, description_type, descriptor, workspace) -> None:
         # TODO nah, okay, pass these in by NODE, not STRING
@@ -203,6 +223,11 @@ class Description():
         self.relevant = False
         
         self.add_to_workspace()
+
+    def get_activation(self):
+        """
+        returns the activation of the descriptor node"""
+        return self.descriptor.activation
     
     def add_to_workspace(self):
         self.workspace.add_description(self)
