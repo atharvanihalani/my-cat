@@ -46,7 +46,8 @@ def bisect_left(a, x, lo=0, *, key=None):
 
 def weighted_choice(mylist, myweights):
     """
-    returns a probabilistically weighted choice from a list
+    returns a probabilistically weighted choice from a list  
+    if list is empty, it returns None
 
     mylist: list of items from which the choice is made  
     myweights: corresponding weights of each item in the list; these shouldn't be negative"""
@@ -69,17 +70,37 @@ def choose_salient_obj(ctx):
 
     return weighted_choice(objects, weights)
 
-def try_choose_relevant_desc(ctx, obj):
+def try_choose_description(ctx, obj):
     """
-    chooses a *relevant* description from a workspace object (as a probabilistic fxn of activation)"""
+    chooses a *relevant* description from a workspace object as a function 
+    of activation (probablistic, of course)  
+
+    obj: a workspace object with a list of descriptions attached  
+    returns: an instance of a Description
+    """
     descriptions = obj.get_descriptions()
     rel_descs = [desc for desc in descriptions if desc.is_relevant()]
     weights = [desc.get_activation() for desc in rel_descs]
 
     return weighted_choice(rel_descs, weights)
 
-def try_get_property(ctx, desc):
-    link = None #get property link from descriptor
+def try_choose_descriptor(ctx, descriptors):
+    '''
+    chooses a descriptor probablistically, weighted by its activation
+    
+    descriptors: a list of descriptor nodes  
+    returns: a single descriptor node'''
+    weights = [desc.activation for desc in descriptors]
+    return weighted_choice(descriptors, weights)
+
+def try_get_property(ctx, descriptor):
+    '''
+    probabilistically chooses a new descriptor node, that's connected to
+    the current node by a property link
+    
+    descriptor: current descriptor Slipnode
+    returns: new descriptor Slipnode, that's property-linked to the current one'''
+    link = None #TODO get property link from descriptor
     probability = (100 - link.length) / 100
 
     if rng.random() > probability:
@@ -87,14 +108,19 @@ def try_get_property(ctx, desc):
     else:
         return link.dest #ie. the corresponding property node (descriptor)
     
-def create_new_desc(ctx, prop):
-    descriptor = prop
+def create_new_description(ctx, descriptor):
+    '''
+    creates a new description from a descriptor node
+    
+    descriptor: a descriptor Slipnode  
+    returns: a Description with this particular descriptor'''
+    descriptor = descriptor
     description_type = descriptor.get_category()
 
     desc = Description(description_type, descriptor, ctx.workspace)
     return desc
 
-    
+
 def bottom_up_description_scout(ctx):
     # choose a workspace object (probabilistic fxn of salience)
     # choose a RELEVANT description from the list (probabilistic fxn of activation)
@@ -105,15 +131,46 @@ def bottom_up_description_scout(ctx):
         # ...with urgency being fxn of activation of description-type
     
     obj = choose_salient_obj(ctx)
-    desc = try_choose_relevant_desc(ctx, obj)
+    desc = try_choose_description(ctx, obj)
     if desc is None:
         return
     
-    newprop = try_get_property(ctx, desc)
-    if newprop is None:
+    new_descriptor = try_get_property(ctx, desc)
+    if new_descriptor is None:
         return
     
-    new_desc = create_new_desc(ctx, newprop)
-    urgency = newprop.get_category().activation
+    new_description = create_new_description(ctx, new_descriptor)
+    urgency = new_descriptor.get_category().activation
     # post a description-strength-tester codelet
+
+def try_apply_descriptor(ctx, d_type, obj):
+    '''
+    d_type: a description-type node (whose descriptors we're testing for)  
+    obj: the object onto which the descriptions might be applicable  
+    
+    returns: list of valid description nodes'''
+    descriptors = d_type.get_descriptors()
+    valid_descriptors = []
+    for descriptor in descriptors:
+        # if descriptor applicable to object, add to list
+        pass
+    return valid_descriptors
+
+def top_down_description_scout(ctx, d_type):
+    '''
+    d_type: a description-type node'''
+    
+    obj = choose_salient_obj(ctx)
+    descriptors_list = try_apply_descriptor(ctx, d_type, obj)
+    if len(descriptors_list) == 0:
+        return
+    
+    descriptor = try_choose_descriptor(ctx, descriptors_list)
+    if descriptor is None:
+        return
+    
+    new_description = create_new_description(ctx, descriptor)
+    urgency = descriptor.get_category().activation
+    # post a strength-tester codelet
+
 

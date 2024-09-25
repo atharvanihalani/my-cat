@@ -205,9 +205,11 @@ class Description():
         edit: or bonds too??
     
     these are of the format: "description-type: descriptor"
-    they are RELEVANT iff their 'description-type'-node is fully activated
     imo these should NOT be included in an update loop. instead, you should toggle their relevance directly
         how? store 'em in a dict in workspace, by 'description-type'?
+    
+    'Relevance' refers to whether the *description-type node* is FULLY-activated
+    'Activation' (of a description), refers to the activation of its *DESCRIPTOR node*
     
     Strength of descriptions, is a function of
         conceptual depth of descriptor

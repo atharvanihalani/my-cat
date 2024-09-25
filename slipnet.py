@@ -38,6 +38,9 @@ class Slipnode():
     3) similarly, what about when a node is clamped? should it keep 'pumping out activation'?
 
 
+    Description-type nodes, should have accessible a list of descriptor nodes
+
+
     """
 
     def __init__(self, depth, net) -> None:
