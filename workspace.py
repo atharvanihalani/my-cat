@@ -198,6 +198,20 @@ class Object():
     def calculate_salience(self):
         pass
 
+    def is_description_present(self, test_description):
+        '''
+        checks whether the passed description is already attached to this object
+        (assumes that an object's descriptors are unique)
+        
+        test_description: the description to check for
+        returns: whether above description is present alr'''
+        test_descriptor = test_description.descriptor
+
+        for description in self.descriptions:
+            if test_descriptor is description.descriptor:
+                return True  
+        return False
+
 
 class Description():
     """
@@ -214,12 +228,16 @@ class Description():
     Strength of descriptions, is a function of
         conceptual depth of descriptor
         activation of description type
-        local support of description (ie. number of other descriptions of the same type, in the same string)        
+        local support of description (ie. number of other descriptions of the same type, in the same string)   
+    Strength affects
+        whether a strength-tester codelet decides to continue or not     
     """
     def __init__(self, description_type, descriptor, workspace) -> None:
         # TODO nah, okay, pass these in by NODE, not STRING
         self.description_type = description_type 
         self.descriptor = descriptor
+        self.strength = None
+        self.obj = None 
 
         self.workspace = workspace
         self.relevant = False
@@ -241,6 +259,13 @@ class Description():
         """
         is this description relevant?"""
         return self.relevant
+    
+    def update_strength(self):
+        ...
+
+    def get_strength(self):
+        self.update_strength()
+        return self.strength
 
 
 class Structure():

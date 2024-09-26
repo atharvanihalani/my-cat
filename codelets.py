@@ -16,12 +16,70 @@ urgency
 """
 
 
-"""
-common methods
-    "choose an object in the Workspace, probabilistically as a function of salience"
-        workspace has list of objects, sorted by salience?
-        or 
-"""
+
+
+def description_scout_bottom_up(ctx):
+    obj = choose_salient_obj(ctx)
+    desc = try_choose_description(ctx, obj)
+    if desc is None:
+        return
+    
+    new_descriptor = try_get_property(ctx, desc)
+    if new_descriptor is None:
+        return
+    
+    new_description = create_new_description(ctx, new_descriptor)
+    urgency = new_descriptor.get_category().activation
+    # post a description-strength-tester codelet
+
+def description_scout_top_down(ctx, d_type):
+    '''
+    d_type: a description-type Slipnode'''
+    
+    obj = choose_salient_obj(ctx)
+    descriptors_list = try_apply_descriptor(ctx, d_type, obj)
+    if len(descriptors_list) == 0:
+        return
+    
+    descriptor = try_choose_descriptor(ctx, descriptors_list)
+    if descriptor is None:
+        return
+    
+    new_description = create_new_description(ctx, descriptor)
+    urgency = descriptor.get_category().activation
+    # post a strength-tester codelet
+
+def description_strength_tester(ctx, desc):
+    '''
+    desc: a proposed Description, whose strength we're testing'''
+    fully_activate_descriptor(desc)
+    strength = desc.get_strength()
+    urgency = strength
+    ... 
+    # TODO decide probabilistically whether 2continue + post desc-builder codelet
+
+def description_builder(ctx, desc):
+    redundant = description_attached_already()
+    if redundant:
+        return
+    
+    fully_activate_descriptor(desc)
+    fully_activate_description_type(desc)
+    
+    # TODO build the description
+
+
+def bottom_up_bond_scout(ctx):
+    obj = choose_salient_obj(ctx)
+
+    pass
+
+
+
+
+
+# ––X––––X––  HELPER METHODS BELOW  ––X––––X–– #
+
 
 def accumulate(iterable):
     total = 0
@@ -32,7 +90,6 @@ def accumulate(iterable):
 def bisect_left(a, x, lo=0, *, key=None):
     """
     Return the index where to insert item x in list a, assuming a is sorted."""
-
     hi = len(a)
 
     if key is None:
@@ -121,27 +178,26 @@ def create_new_description(ctx, descriptor):
     return desc
 
 
-def bottom_up_description_scout(ctx):
-    # choose a workspace object (probabilistic fxn of salience)
-    # choose a RELEVANT description from the list (probabilistic fxn of activation)
-        # might be None!
-    # does descriptor have property links? they short enough?
-    # probabilistically pick a property, fxn of a) degree of association, b) activation
-    # propose a description based on this property; post a strength-tester 
-        # ...with urgency being fxn of activation of description-type
+def fully_activate_descriptor(description):
+    '''
+    description: the Description object, whose descriptor Node we're activating'''
+    descriptor = description.descriptor
+    descriptor.fully_activate()
     
-    obj = choose_salient_obj(ctx)
-    desc = try_choose_description(ctx, obj)
-    if desc is None:
-        return
+def fully_activate_description_type(description):
+    '''
+    description: the Description object, whose description-type Node we're activating'''
+    description_type = description.description_type
+    description_type.fully_activate()
+
+def description_attached_already(ctx, description) -> bool:
+    '''
+    returns whether the proposed description is already attached to the given object
     
-    new_descriptor = try_get_property(ctx, desc)
-    if new_descriptor is None:
-        return
-    
-    new_description = create_new_description(ctx, new_descriptor)
-    urgency = new_descriptor.get_category().activation
-    # post a description-strength-tester codelet
+    desc: the proposed Description
+    returns: whether it's already attached to the given object'''
+    obj = description.obj
+    return obj.is_description_present(description)
 
 def try_apply_descriptor(ctx, d_type, obj):
     '''
@@ -152,25 +208,7 @@ def try_apply_descriptor(ctx, d_type, obj):
     descriptors = d_type.get_descriptors()
     valid_descriptors = []
     for descriptor in descriptors:
-        # if descriptor applicable to object, add to list
+        # TODO if descriptor applicable to object, add to list
         pass
     return valid_descriptors
-
-def top_down_description_scout(ctx, d_type):
-    '''
-    d_type: a description-type node'''
-    
-    obj = choose_salient_obj(ctx)
-    descriptors_list = try_apply_descriptor(ctx, d_type, obj)
-    if len(descriptors_list) == 0:
-        return
-    
-    descriptor = try_choose_descriptor(ctx, descriptors_list)
-    if descriptor is None:
-        return
-    
-    new_description = create_new_description(ctx, descriptor)
-    urgency = descriptor.get_category().activation
-    # post a strength-tester codelet
-
 
